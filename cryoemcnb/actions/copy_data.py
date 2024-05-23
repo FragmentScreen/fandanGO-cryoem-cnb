@@ -23,6 +23,7 @@ def copy_data(project_name, raw_data_path):
 
     Returns:
         success (bool): if everything went ok or not
+        info (dict): irods collection info (path, ticket id, etc.)
     """
 
     print(f'FandanGO will create an iRODS collection for project {project_name} with raw data located at {raw_data_path}...')
@@ -53,7 +54,6 @@ def copy_data(project_name, raw_data_path):
 
         except Exception as e:
             info = f'... collection could not be created for project {project_name} because of: {e}'
-            print(info)
     return success, info
 
 
