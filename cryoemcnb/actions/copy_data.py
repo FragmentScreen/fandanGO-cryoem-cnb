@@ -45,6 +45,7 @@ def copy_data(project_name, raw_data_path):
             print(f'... ticket generated with id {ticket_id}...')
 
             # update ddbb
+            update_project(project_name, 'data_manager', 'irods')
             update_project(project_name, 'irods_location', new_collection)
             update_project(project_name, 'irods_ticket_id', ticket_id)
             info = {'irods_location': new_collection, 'irods_ticket_id': ticket_id}
