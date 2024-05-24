@@ -1,4 +1,5 @@
 .env
+config.yaml
 build
 *.egg-info
 *.sqlite
