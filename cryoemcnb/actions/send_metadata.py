@@ -7,7 +7,7 @@ from fGOaria import AriaClient, Bucket, Field, pretty_print
 
 load_dotenv()
 
-def send_metadata(project_name):
+def send_metadata(project_name, visit_id):
     """
     Function that prints info for a FandanGO project
 
@@ -28,7 +28,6 @@ def send_metadata(project_name):
 
         aria = AriaClient(True)
         today = datetime.today()
-        visit_id = today.strftime('%Y%m%d')
         visit = aria.new_data_manager(visit_id, 'visit', True)
         embargo_date = datetime(today.year + 3, today.month, today.day).strftime('%Y-%m-%d')
         bucket = Bucket(visit.entity_id, visit.entity_type, embargo_date)
@@ -60,6 +59,6 @@ def send_metadata(project_name):
 
 
 def perform_action(args):
-    success, info = send_metadata(args['name'])
+    success, info = send_metadata(args['name'], args['visit_id'])
     results = {'success': success, 'info': info}
     return results

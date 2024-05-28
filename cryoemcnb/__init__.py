@@ -31,6 +31,15 @@ class Plugin(core.Plugin):
                                }
             }
         })
+        cls.define_arg(ACTION_SEND_METADATA, {
+            'help': {'usage': '--visit-id VISIT_ID',
+                     'epilog': '--visit-id 2'},
+            'args': {
+                'visit-id': {'help': 'ARIA visit id',
+                             'required': True
+                             }
+            }
+        })
 
 
     @classmethod
