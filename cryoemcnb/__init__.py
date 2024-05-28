@@ -26,7 +26,7 @@ class Plugin(core.Plugin):
                            'required': True,
                            'choices': ['scipion', 'emadmin']
                            },
-                'output-dir': {'help': 'folder for saving the Scipion workflow',
+                'output-dir': {'help': 'folder for saving the Scipion or EMadmin workflow',
                                'required': True
                                }
             }
