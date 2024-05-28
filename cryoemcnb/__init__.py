@@ -1,6 +1,6 @@
 import core
-from cryoemcnb.constants import ACTION_COPY_DATA, ACTION_GENERATE_METADATA, ACTION_PRINT_PROJECT
-from cryoemcnb.actions import copy_data, generate_metadata, print_project
+from cryoemcnb.constants import ACTION_COPY_DATA, ACTION_GENERATE_METADATA, ACTION_SEND_METADATA, ACTION_PRINT_PROJECT
+from cryoemcnb.actions import copy_data, generate_metadata, send_metadata, print_project
 
 class Plugin(core.Plugin):
 
@@ -32,8 +32,10 @@ class Plugin(core.Plugin):
             }
         })
 
+
     @classmethod
     def define_methods(cls):
         cls.define_method(ACTION_COPY_DATA, copy_data.perform_action)
         cls.define_method(ACTION_GENERATE_METADATA, generate_metadata.perform_action)
+        cls.define_method(ACTION_SEND_METADATA, send_metadata.perform_action)
         cls.define_method(ACTION_PRINT_PROJECT, print_project.perform_action)

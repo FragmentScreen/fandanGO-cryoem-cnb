@@ -4,6 +4,7 @@
 
 ACTION_COPY_DATA = 'copy-data'
 ACTION_GENERATE_METADATA = 'generate-metadata'
+ACTION_SEND_METADATA = 'send-metadata'
 ACTION_PRINT_PROJECT = 'print-project'
 
 #
