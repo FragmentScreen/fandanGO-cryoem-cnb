@@ -1,6 +1,7 @@
 import os
 from irods.session import iRODSSession
 from irods.ticket import Ticket
+from irods.exception import CollectionDoesNotExist
 from dotenv import load_dotenv
 from cryoemcnb.db.sqlite_db import update_project
 
@@ -12,6 +13,7 @@ irods_user = os.getenv('IRODS_ZONE_USER')
 irods_port = os.getenv('IRODS_ZONE_PORT')
 irods_pass = os.getenv('IRODS_ZONE_PASS')
 irods_parent_collection = os.getenv('IRODS_ZONE_COLLECTION')
+
 
 def copy_data(project_name, raw_data_path):
     """
@@ -34,10 +36,21 @@ def copy_data(project_name, raw_data_path):
         try:
             # create new collection and put the data onto it
             new_collection = irods_parent_collection + project_name
-            session.collections.create(new_collection)
-            for file_name in os.listdir(raw_data_path):
-                local_file_path = os.path.join(raw_data_path, file_name)
-                session.data_objects.put(local_file_path, new_collection + '/' + file_name)
+
+            # upload recursively
+            for root, dirs, files in os.walk(raw_data_path):
+                for name in dirs:
+                    local_subdir = os.path.join(root, name)
+                    irods_subdir = os.path.join(new_collection, os.path.relpath(local_subdir, raw_data_path)).replace("\\", "/")
+                    try:
+                        session.collections.get(irods_subdir)
+                    except CollectionDoesNotExist:
+                        session.collections.create(irods_subdir)
+
+                for name in files:
+                    local_file = os.path.join(root, name)
+                    irods_file = os.path.join(new_collection, os.path.relpath(local_file, raw_data_path)).replace("\\", "/")
+                    session.data_objects.put(local_file, irods_file)
 
             # create ticket for retrieving the data back
             print(f'Creating ticket for project {project_name}...')
