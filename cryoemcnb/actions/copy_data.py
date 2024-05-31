@@ -53,17 +53,9 @@ def copy_data(project_name, raw_data_path):
                     irods_file = os.path.join(new_collection, os.path.relpath(local_file, raw_data_path)).replace("\\", "/")
                     session.data_objects.put(local_file, irods_file)
 
-            # set read rights to anonymous user recursively
-            def ichmod_recursive(collection_path, user, permission):
-                collection = session.collections.get(collection_path)
-                session.acls.set(iRODSAccess(permission,collection_path, user), recursive=True)
-                for subcollection in collection.subcollections:
-                    ichmod_recursive(subcollection.path, user, permission)
-                for data_object in collection.data_objects:
-                    session.acls.set(iRODSAccess(permission,data_object.path, user))
-                session.acls.set(iRODSAccess(permission,data_object.path, user))
-
-            ichmod_recursive(new_collection, 'anonymous', 'read')
+            # avoid 'anonymous' or 'public' user access to collection without having ticket id
+            session.acls.set(iRODSAccess('null',new_collection, 'anonymous'),recursive=True)
+            session.acls.set(iRODSAccess('null',new_collection, 'public'),recursive=True)
 
             # create ticket for retrieving the data back
             print(f'Creating ticket for project {project_name}...')
