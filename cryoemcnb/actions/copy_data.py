@@ -2,6 +2,7 @@ import os
 from irods.session import iRODSSession
 from irods.ticket import Ticket
 from irods.exception import CollectionDoesNotExist
+from irods.access import iRODSAccess
 from dotenv import load_dotenv
 from cryoemcnb.db.sqlite_db import update_project
 
@@ -51,6 +52,18 @@ def copy_data(project_name, raw_data_path):
                     local_file = os.path.join(root, name)
                     irods_file = os.path.join(new_collection, os.path.relpath(local_file, raw_data_path)).replace("\\", "/")
                     session.data_objects.put(local_file, irods_file)
+
+            # set read rights to anonymous user recursively
+            def ichmod_recursive(collection_path, user, permission):
+                collection = session.collections.get(collection_path)
+                session.acls.set(iRODSAccess(permission,collection_path, user), recursive=True)
+                for subcollection in collection.subcollections:
+                    ichmod_recursive(subcollection.path, user, permission)
+                for data_object in collection.data_objects:
+                    session.acls.set(iRODSAccess(permission,data_object.path, user))
+                session.acls.set(iRODSAccess(permission,data_object.path, user))
+
+            ichmod_recursive(new_collection, 'anonymous', 'read')
 
             # create ticket for retrieving the data back
             print(f'Creating ticket for project {project_name}...')
