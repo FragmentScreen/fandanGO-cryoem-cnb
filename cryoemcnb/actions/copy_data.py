@@ -73,11 +73,11 @@ def copy_data(project_name, raw_data_path):
         update_project(project_name, 'irods_host', irods_host)
         update_project(project_name, 'irods_location', new_collection)
         update_project(project_name, 'irods_ticket_id', ticket_id)
-        update_project(project_name, 'irods_retrieval_script', 'https://raw.githubusercontent.com/cemcof/cemcof.github.io/main/irods_fetch_unix.sh')
+        update_project(project_name, 'irods_retrieval_script', 'https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh')
         info = {'irods_host': irods_host,
                 'irods_location': new_collection,
                 'irods_ticket_id': ticket_id,
-                'irods_retrieval_script': 'https://raw.githubusercontent.com/cemcof/cemcof.github.io/main/irods_fetch_unix.sh'}
+                'irods_retrieval_script': 'https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh'}
 
     return success, info
 
