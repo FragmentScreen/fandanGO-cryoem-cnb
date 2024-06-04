@@ -1,6 +1,9 @@
+[DDBB]
+DDBB_PATH = /home/user/FandanGOUserData
+
 [SCIPION]
 SCIPION_LAUNCHER = /home/user/scipion3/scipion3
 SCIPION_PROJECTS_PATH = /home/user/ScipionUserData/projects
 
 [EMADMIN]
-EMADMIN_DB_PATH = /home/user/EMadmin/EMadmin/src/db.sqlite3
+EMADMIN_DDBB_PATH = /home/user/EMadmin/EMadmin/src/db.sqlite3

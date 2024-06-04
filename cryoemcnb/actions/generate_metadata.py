@@ -9,7 +9,7 @@ config = configparser.ConfigParser()
 config.read(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config.yaml'))
 scipion_launcher = config['SCIPION'].get('SCIPION_LAUNCHER')
 scipion_projects_path = config['SCIPION'].get('SCIPION_PROJECTS_PATH')
-emadmin_ddbb_path = config['EMADMIN'].get('EMADMIN_DB_PATH')
+emadmin_ddbb_path = config['EMADMIN'].get('EMADMIN_DDBB_PATH')
 
 def generate_metadata_data(project_name, acquisition_name, source, output_dir):
     """
