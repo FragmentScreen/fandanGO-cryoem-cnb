@@ -15,6 +15,8 @@ irods_port = os.getenv('IRODS_ZONE_PORT')
 irods_pass = os.getenv('IRODS_ZONE_PASS')
 irods_parent_collection = os.getenv('IRODS_ZONE_COLLECTION')
 
+def is_broken_symlink(path):
+    return os.path.islink(path) and not os.path.exists(path)
 
 def copy_data(project_name, raw_data_path):
     """
@@ -42,6 +44,9 @@ def copy_data(project_name, raw_data_path):
             for root, dirs, files in os.walk(raw_data_path):
                 for name in dirs:
                     local_subdir = os.path.join(root, name)
+                    if is_broken_symlink(local_subdir):
+                        print(f'Skipping broken symlink: {local_subdir}')
+                        continue
                     irods_subdir = os.path.join(new_collection, os.path.relpath(local_subdir, raw_data_path)).replace("\\", "/")
                     try:
                         session.collections.get(irods_subdir)
@@ -50,6 +55,9 @@ def copy_data(project_name, raw_data_path):
 
                 for name in files:
                     local_file = os.path.join(root, name)
+                    if is_broken_symlink(local_file):
+                        print(f'Skipping broken symlink: {local_file}')
+                        continue
                     irods_file = os.path.join(new_collection, os.path.relpath(local_file, raw_data_path)).replace("\\", "/")
                     session.data_objects.put(local_file, irods_file)
 
