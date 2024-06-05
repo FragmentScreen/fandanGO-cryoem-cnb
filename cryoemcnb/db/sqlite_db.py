@@ -45,3 +45,19 @@ def get_project_metadata(project_name):
     finally:
         if connection:
             close_connection_to_ddbb(connection)
+
+
+def get_project_data_retrieval_info(project_name):
+    connection = None
+    try:
+        connection = connect_to_ddbb()
+        cursor = connection.cursor()
+        cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "data_retrieval_command"', (project_name,))
+        retrieval_info = cursor.fetchall()
+        retrieval_info = [command[0] for command in retrieval_info]
+        return retrieval_info
+    except Exception as e:
+        print(f'... could not check projects because of: {e}')
+    finally:
+        if connection:
+            close_connection_to_ddbb(connection)

@@ -77,11 +77,7 @@ def copy_data(project_name, raw_data_path):
 
     if success:
         # update ddbb
-        update_project(project_name, 'data_manager', 'irods')
-        update_project(project_name, 'irods_host', irods_host)
-        update_project(project_name, 'irods_location', new_collection)
-        update_project(project_name, 'irods_ticket_id', ticket_id)
-        update_project(project_name, 'irods_retrieval_script', 'https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh')
+        update_project(project_name, 'data_retrieval_command', f'curl -sSfL "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh" | bash -s -- --host "{irods_host}" --collection "{new_collection}" --ticket "{ticket_id}"')
         info = {'irods_host': irods_host,
                 'irods_location': new_collection,
                 'irods_ticket_id': ticket_id,

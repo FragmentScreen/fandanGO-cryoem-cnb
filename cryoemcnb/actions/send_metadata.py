@@ -1,4 +1,4 @@
-from cryoemcnb.db.sqlite_db import get_project_metadata
+from cryoemcnb.db.sqlite_db import get_project_metadata, get_project_data_retrieval_info
 from datetime import datetime
 from dotenv import load_dotenv
 import json
@@ -25,6 +25,7 @@ def send_metadata(project_name, visit_id):
 
     try:
         project_metadata = get_project_metadata(project_name)
+        project_retrieval_info = get_project_data_retrieval_info(project_name)
 
         aria = AriaClient(True)
         today = datetime.today()
@@ -35,15 +36,18 @@ def send_metadata(project_name, visit_id):
         record = visit.create_record(bucket.id, 'TestSchema')
 
         for json_path in project_metadata:
-            if os.path.exists(json_path):
-                with open(json_path, 'r') as file:
-                    data = json.load(file)
-                    field = Field(record.id, 'TestFieldType', data)
-                    visit.push(field)
-                    if not isinstance(field, Field):
-                        success = False
-            else:
-                info += f'Metadata file {json_path} not found\n'
+            with open(json_path, 'r') as file:
+                data = json.load(file)
+                field = Field(record.id, 'TestFieldType', data)
+                visit.push(field)
+                if not isinstance(field, Field):
+                    success = False
+
+        for retrieval_info in project_retrieval_info:
+            field = Field(record.id, 'TestFieldType', retrieval_info)
+            visit.push(field)
+            if not isinstance(field, Field):
+                success = False
 
     except Exception as e:
         success = False
