@@ -13,6 +13,7 @@ def send_metadata(project_name, visit_id):
 
     Args:
         project_name (str): FandanGO project name
+        visit_id (int): ARIA visit ID
 
     Returns:
         success (bool): if everything went ok or not
