@@ -18,6 +18,19 @@ irods_parent_collection = os.getenv('IRODS_ZONE_COLLECTION')
 def is_broken_symlink(path):
     return os.path.islink(path) and not os.path.exists(path)
 
+def find_collection_physical_path(session, virtual_path):
+    collection = session.collections.get(virtual_path)
+
+    for obj in collection.data_objects:
+        for replica in obj.replicas:
+            physical_path = replica.path
+            return physical_path
+
+    for subcollection in collection.subcollections:
+        sub_physical_path = find_collection_physical_path(subcollection.path)
+        if sub_physical_path:
+            return sub_physical_path
+
 def copy_data(project_name, raw_data_path):
     """
     Function that creates an iRODS collection from data provided
@@ -70,6 +83,10 @@ def copy_data(project_name, raw_data_path):
             new_ticket = Ticket(session)
             ticket_id = new_ticket.issue(target=new_collection, permission='read').string
             print(f'... ticket generated with id {ticket_id}...')
+
+            # get collection physical location
+            first_file_physical_path = find_collection_physical_path(session, new_collection)
+            collection_physical_path = os.path.join(first_file_physical_path.split(project_name)[0], project_name)
             success = True
 
         except Exception as e:
@@ -78,6 +95,8 @@ def copy_data(project_name, raw_data_path):
     if success:
         # update ddbb
         update_project(project_name, 'data_retrieval_command', f'curl -sSfL "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh" | bash -s -- --host "{irods_host}" --collection "{new_collection}" --ticket "{ticket_id}"')
+        update_project(project_name, 'data_physical_location', collection_physical_path)
+
         info = {'irods_host': irods_host,
                 'irods_location': new_collection,
                 'irods_ticket_id': ticket_id,
