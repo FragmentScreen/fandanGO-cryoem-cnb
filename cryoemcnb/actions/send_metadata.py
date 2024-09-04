@@ -29,6 +29,7 @@ def send_metadata(project_name, visit_id):
         project_retrieval_info = get_project_data_retrieval_info(project_name)
 
         aria = AriaClient(True)
+        aria.login()
         today = datetime.today()
         visit = aria.new_data_manager(visit_id, 'visit', True)
         embargo_date = datetime(today.year + 3, today.month, today.day).strftime('%Y-%m-%d')
