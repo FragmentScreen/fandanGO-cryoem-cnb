@@ -2,6 +2,7 @@ import core
 from cryoemcnb.constants import ACTION_COPY_DATA, ACTION_GENERATE_METADATA, ACTION_SEND_METADATA, ACTION_PRINT_PROJECT
 from cryoemcnb.actions import copy_data, generate_metadata, send_metadata, print_project
 
+
 class Plugin(core.Plugin):
 
     @classmethod
@@ -15,22 +16,17 @@ class Plugin(core.Plugin):
                                   }
             }
         })
+
         cls.define_arg(ACTION_GENERATE_METADATA, {
-            'help': {'usage': '--acquisition-name ACQUSITION_NAME --source {scipion, emadmin} --output-dir OUTPUT_DIR',
-                     'epilog': '--acquisition-name 2024_05_24_username_000001 --source emadmin --output-dir /home/user/Desktop'},
+            'help': {'usage': '--metadata-path METADATA_PATH',
+                     'epilog': '--metadata-path /home/user/ScipionUserData/projects/Project_scipion/Runs/003083_ProtOSCEM/extra'},
             'args': {
-                'acquisition-name': {'help': 'Scipion or EMadmin project name',
-                                     'required': True
-                                     },
-                'source': {'help': 'Choose between Scipion or EMadmin metadata',
-                           'required': True,
-                           'choices': ['scipion', 'emadmin']
-                           },
-                'output-dir': {'help': 'folder for saving the Scipion or EMadmin workflow',
-                               'required': True
-                               }
+                'metadata-path': {'help': 'path of the metadata generated with the OSCEM_json protocol',
+                                  'required': True
+                                  }
             }
         })
+
         cls.define_arg(ACTION_SEND_METADATA, {
             'help': {'usage': '--visit-id VISIT_ID',
                      'epilog': '--visit-id 2'},
@@ -40,7 +36,6 @@ class Plugin(core.Plugin):
                              }
             }
         })
-
 
     @classmethod
     def define_methods(cls):

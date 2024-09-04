@@ -36,7 +36,7 @@ def get_project_metadata(project_name):
     try:
         connection = connect_to_ddbb()
         cursor = connection.cursor()
-        cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND (key = "scipion_metadata_path" OR key = "acquisition_metadata_path")', (project_name,))
+        cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "metadata_path"', (project_name,))
         project_metadata = cursor.fetchall()
         project_metadata = [metadata_file[0] for metadata_file in project_metadata]
         return project_metadata
