@@ -109,9 +109,13 @@ def download_completed(port, host, user, password, zone):
     return total_files == current_file
 
 while True:
-    is_complete = download_completed(arguments.port, arguments.host, arguments.user, arguments.password, arguments.zone)
-    if is_complete:
-        break
+    try:
+        is_complete = download_completed(arguments.port, arguments.host, arguments.user, arguments.password, arguments.zone)
+        if is_complete:
+            break
+    except Exception as e:
+        print(f"Something bad happened: {e}")
+        pass
 
 # iRODS session closed
 print(f"Successfully downloaded collection: {arguments.collection_path}")
