@@ -1,9 +1,10 @@
 import os
 from irods.session import iRODSSession
 from irods.ticket import Ticket
-from irods.exception import CollectionDoesNotExist
+from irods.exception import CollectionDoesNotExist, NetworkException
 from irods.access import iRODSAccess
 from dotenv import load_dotenv
+import time
 from cryoemcnb.db.sqlite_db import update_project
 
 load_dotenv()
@@ -18,6 +19,7 @@ irods_parent_collection = os.getenv('IRODS_ZONE_COLLECTION')
 def is_broken_symlink(path):
     return os.path.islink(path) and not os.path.exists(path)
 
+
 def find_collection_physical_path(session, virtual_path):
     collection = session.collections.get(virtual_path)
 
@@ -30,6 +32,42 @@ def find_collection_physical_path(session, virtual_path):
         sub_physical_path = find_collection_physical_path(subcollection.path)
         if sub_physical_path:
             return sub_physical_path
+
+
+def ensure_collection_exists(session, irods_subdir, max_retries=15):
+    for attempt in range(max_retries):
+        try:
+            session.collections.get(irods_subdir)
+            return True
+        except CollectionDoesNotExist:
+            session.collections.create(irods_subdir)
+            return True
+        except (NetworkException, KeyError) as e:
+            print(f"Network or connection error {e}. . Trying to reconnect... (Try {attempt + 1}/{max_retries})")
+            session.cleanup()
+            session.__init__(host=irods_host, port=irods_port, user=irods_user, password=irods_pass, zone=irods_zone)
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return False
+    print(f"The connection to iRODS Zone was not successful after {max_retries} tries.")
+    return False
+
+
+def upload_file_with_reconnect(session, local_file, irods_file, max_retries=15):
+    for attempt in range(max_retries):
+        try:
+            session.data_objects.put(local_file, irods_file)
+            return True
+        except (NetworkException, KeyError):
+            print(f"Error while transfer {local_file}. Trying to reconnect... (Try {attempt + 1}/{max_retries})")
+            session.cleanup()
+            session.__init__(host=irods_host, port=irods_port, user=irods_user, password=irods_pass, zone=irods_zone)
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return False
+    print(f"The transfer of {local_file} was not successful after {max_retries} tries.")
+    return False
+
 
 def copy_data(project_name, raw_data_path):
     """
@@ -61,10 +99,7 @@ def copy_data(project_name, raw_data_path):
                         print(f'Skipping broken symlink: {local_subdir}')
                         continue
                     irods_subdir = os.path.join(new_collection, os.path.relpath(local_subdir, raw_data_path)).replace("\\", "/")
-                    try:
-                        session.collections.get(irods_subdir)
-                    except CollectionDoesNotExist:
-                        session.collections.create(irods_subdir)
+                    ensure_collection_exists(session, irods_subdir)
 
                 for name in files:
                     local_file = os.path.join(root, name)
@@ -72,11 +107,15 @@ def copy_data(project_name, raw_data_path):
                         print(f'Skipping broken symlink: {local_file}')
                         continue
                     irods_file = os.path.join(new_collection, os.path.relpath(local_file, raw_data_path)).replace("\\", "/")
-                    session.data_objects.put(local_file, irods_file)
+                    print(f"Copying {local_file} into {irods_file} ...")
+                    if upload_file_with_reconnect(session, local_file, irods_file):
+                        print("... copied!")
+                    else:
+                        print(f"... failed to upload {local_file}. Skipping...")
 
             # avoid 'anonymous' or 'public' user access to collection without having ticket id
-            session.acls.set(iRODSAccess('null',new_collection, 'anonymous'),recursive=True)
-            session.acls.set(iRODSAccess('null',new_collection, 'public'),recursive=True)
+            session.acls.set(iRODSAccess('null', new_collection, 'anonymous'), recursive=True)
+            session.acls.set(iRODSAccess('null', new_collection, 'public'), recursive=True)
 
             # create ticket for retrieving the data back
             print(f'Creating ticket for project {project_name}...')
