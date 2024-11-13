@@ -26,8 +26,7 @@ def generate_metadata_data(project_name, metadata_path):
     print(f'FandanGO will retrieve generated metadata for project {project_name}...')
     success = False
     info = None
-    json_file = os.path.join(metadata_path, 'Processing_metadata.json')
-    if os.path.exists(json_file):
+    if os.path.exists(metadata_path):
         success = True
         update_project(project_name, 'metadata_path', metadata_path)
         info = {'metadata_path': metadata_path}
