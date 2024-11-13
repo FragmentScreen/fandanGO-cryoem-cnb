@@ -31,25 +31,27 @@ def send_metadata(project_name, visit_id):
         aria = AriaClient(True)
         aria.login()
         today = datetime.today()
-        visit = aria.new_data_manager(visit_id, 'visit', True)
+        visit = aria.new_data_manager(int(visit_id), 'visit', True)
         embargo_date = datetime(today.year + 3, today.month, today.day).strftime('%Y-%m-%d')
         bucket = Bucket(visit.entity_id, visit.entity_type, embargo_date)
         visit.push(bucket)
-        record = visit.create_record(bucket.id, 'TestSchema')
 
-        # for json_path in project_metadata:
-        #     with open(json_path, 'r') as file:
-        #         data = json.load(file)
-        #         field = Field(record.id, 'TestFieldType', data)
-        #         visit.push(field)
-        #         if not isinstance(field, Field):
-        #             success = False
+        # project metadata
+        record_oscem = visit.create_record(bucket.id, 'OSCEM')
+        for json_path in project_metadata:
+            with open(json_path, 'r') as file:
+                data = json.load(file)
+                field = Field(record_oscem.id, 'JSON', data)
+                visit.push(field)
+                if not isinstance(field, Field):
+                    success = False
 
-        for retrieval_info in project_retrieval_info:
-            field = Field(record.id, 'TestFieldType', retrieval_info)
-            visit.push(field)
-            if not isinstance(field, Field):
-                success = False
+        # data retrieval info
+        record_retrieval_info = visit.create_record(bucket.id, 'Generic')
+        field = Field(record_retrieval_info.id, 'COMMAND', project_retrieval_info)
+        visit.push(field)
+        if not isinstance(field, Field):
+            success = False
 
     except Exception as e:
         success = False
@@ -58,7 +60,8 @@ def send_metadata(project_name, visit_id):
     if success:
         print(f'Successfully sent metadata for project {project_name} to ARIA!')
         info = {'bucket': bucket.__dict__,
-                'record': record.__dict__,
+                'record_oscem': record_oscem.__dict__,
+                'record_retrieval_info': record_retrieval_info.__dict__,
                 'field': field.__dict__}
 
     return success, info
