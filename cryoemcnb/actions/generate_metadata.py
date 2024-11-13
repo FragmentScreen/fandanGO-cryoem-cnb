@@ -23,7 +23,7 @@ def generate_metadata_data(project_name, metadata_path):
         info (dict): info metadata path
     """
 
-    print(f'FandanGO will retrieved generated metadata for project {project_name}...')
+    print(f'FandanGO will retrieve generated metadata for project {project_name}...')
     success = False
     info = None
     json_file = os.path.join(metadata_path, 'Processing_metadata.json')
@@ -40,7 +40,6 @@ def generate_metadata_data(project_name, metadata_path):
 
 
 def perform_action(args):
-    print(args)
     success, info = generate_metadata_data(args['name'], args['metadata_path'])
     results = {'success': success, 'info': info}
     return results

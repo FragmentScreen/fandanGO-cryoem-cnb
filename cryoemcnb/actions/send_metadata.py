@@ -9,7 +9,7 @@ load_dotenv()
 
 def send_metadata(project_name, visit_id):
     """
-    Function that prints info for a FandanGO project
+    Function that sends FandanGO project info to ARIA
 
     Args:
         project_name (str): FandanGO project name
@@ -37,13 +37,13 @@ def send_metadata(project_name, visit_id):
         visit.push(bucket)
         record = visit.create_record(bucket.id, 'TestSchema')
 
-        for json_path in project_metadata:
-            with open(json_path, 'r') as file:
-                data = json.load(file)
-                field = Field(record.id, 'TestFieldType', data)
-                visit.push(field)
-                if not isinstance(field, Field):
-                    success = False
+        # for json_path in project_metadata:
+        #     with open(json_path, 'r') as file:
+        #         data = json.load(file)
+        #         field = Field(record.id, 'TestFieldType', data)
+        #         visit.push(field)
+        #         if not isinstance(field, Field):
+        #             success = False
 
         for retrieval_info in project_retrieval_info:
             field = Field(record.id, 'TestFieldType', retrieval_info)
