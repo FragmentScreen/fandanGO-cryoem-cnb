@@ -3,11 +3,23 @@
 # Invoke: curl -sSfL "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh" | bash -s -- --host "{host}" --ticket "{ticket}" --collection "{colleciton_path}"
 
 # Ensure irods module is installed
-if python3 -c "import irods" >/dev/null 2>&1; then
-    echo "iRODS module found."
+version_ge() {
+    printf '%s\n%s\n' "$2" "$1" | sort -V | head -n 1 | grep -qx "$2"
+}
+
+if python3 -c "import irods; print(irods.__version__)" >/dev/null 2>&1; then
+    VERSION=$(python3 -c "import irods; print(irods.__version__)")
+    REQUIRED_VERSION="3.0.0"
+
+    if version_ge "$VERSION" "$REQUIRED_VERSION"; then
+        echo "iRODS module found (version $VERSION)."
+    else
+        echo "iRODS version $VERSION found, but at least $REQUIRED_VERSION is required. Upgrading..."
+        python3 -m pip install --upgrade "python-irodsclient>=$REQUIRED_VERSION"
+    fi
 else
-    echo "python-iordsclient is not installed. Installing..."
-    python3 -m pip install python-irodsclient
+    echo "python-irodsclient is not installed. Installing..."
+    python3 -m pip install "python-irodsclient>=3.0.0"
 fi
 
 
