@@ -31,35 +31,35 @@ aparser.add_argument("--port", "-p", dest="port", type=int, default="1247", help
 aparser.add_argument("--user", "-u", dest="user", default="anonymous", help="iRODS user, defaults to 'anonymous'")
 aparser.add_argument("--password", "-P", dest="password", default="", help="iRODS user password, defaults to empty password")
 
-aparser.add_argument("--collection", "-c", required=True, dest="collection_path", type=pathlib.Path, help="Collection path")
+aparser.add_argument("--collection", "-c", required=True, dest="collection_path", type=str, help="Collection path")
 aparser.add_argument("--output_dir", "-o", dest="output_dir", type=pathlib.Path, default=pathlib.Path("."))
 
 arguments = aparser.parse_args()
 
 # Extract zone from the collection argument (first path part)
-arguments.zone = arguments.collection_path.parts[1]
+arguments.zone = arguments.collection_path.split("/")[1]
 
-def download_completed(port, host, user, password, zone):
+def download_completed(port, host, user, password, zone, collection_path, ticket, output_dir):
     # Open iRODS session
     with iRODSSession(port=port, host=host, user=user, password=password, zone=zone) as irods_session:
 
         # -------- grent ticket
         # new_t = Ticket(irods_session)
-        # new_t.issue("read", arguments.collection_path)
+        # new_t.issue("read", collection_path)
         # print(new_t.string)
         # exit()
         # -------
 
         # Supply the access ticket, if any
-        if arguments.ticket:
-            Ticket(irods_session, arguments.ticket).supply()
+        if ticket:
+            Ticket(irods_session, ticket).supply()
             # collection = iRODSCollection(irods_session.collections, irods_session.query(Collection).one())
         #else:
-        #    collection = irods_session.collections.get(arguments.collection_path)
+        #    collection = irods_session.collections.get(collection_path)
 
 
         #irods_session.query()
-        collection = irods_session.collections.get(str(arguments.collection_path))
+        collection = irods_session.collections.get(str(collection_path))
         print(f"Connected to iRODS, starting file downloads from the collection {collection.path}...")
 
         def walk_collection(collection: iRODSCollection):
@@ -76,7 +76,7 @@ def download_completed(port, host, user, password, zone):
         try:
             # Download collection files
             for data_obj in data_objects:
-                target_path: pathlib.Path = arguments.output_dir / pathlib.Path(data_obj.path).relative_to(arguments.collection_path)
+                target_path: pathlib.Path = output_dir / pathlib.Path(data_obj.path).relative_to(collection_path)
 
                 # Check if file already exists and has same size as collection file
                 # In that case, skip it
@@ -110,7 +110,7 @@ def download_completed(port, host, user, password, zone):
 
 while True:
     try:
-        is_complete = download_completed(arguments.port, arguments.host, arguments.user, arguments.password, arguments.zone)
+        is_complete = download_completed(arguments.port, arguments.host, arguments.user, arguments.password, arguments.zone, arguments.collection_path, arguments.ticket, arguments.output_dir)
         if is_complete:
             break
     except Exception as e:
