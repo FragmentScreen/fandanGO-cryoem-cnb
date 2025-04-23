@@ -1,3 +1,5 @@
+# Invoke: $scriptPath = "$(Get-Location)\irods_fetch_win.ps1"; (Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/refs/heads/main/cryoemcnb/utils/irods_fetch_win.ps1").Content | Out-File $scriptPath -Encoding UTF8; & powershell -ExecutionPolicy Bypass -File $scriptPath --host "{host}" --ticket "{ticket}" --collection "{colleciton_path}"; Remove-Item $scriptPath
+
 # Define path to Python
 $PYTHON = "python"
 
@@ -10,6 +12,7 @@ function Version-Ge {
     return ([Version]$version1 -ge [Version]$version2)
 }
 
+# Intentar obtener la versión del módulo iRODS
 try {
     $VERSION = & $PYTHON -c "import irods; print(irods.__version__)" 2>$null
 } catch {
