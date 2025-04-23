@@ -2,15 +2,8 @@
 
 # Invoke: curl -sSfL "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh" | bash -s -- --host "{host}" --ticket "{ticket}" --collection "{colleciton_path}"
 
-# --- Find compatible Python executable ---
-if command -v python3 &>/dev/null; then
-    PYTHON=python3
-elif command -v python &>/dev/null; then
-    PYTHON=python
-else
-    echo "❌ Python is not installed."
-    exit 1
-fi
+# Define path to Python
+PYTHON = "python3"
 
 # Ensure irods module is installed
 version_ge() {
@@ -36,9 +29,3 @@ fi
 # Execute downloader from url
 python_script_url="https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch.py"
 curl -fL $python_script_url | $PYTHON - $@
-
-# Alternative:
-# temp_file=$(mktemp)
-# curl -sSfL -o "$temp_file" "$python_script_url"
-# $PYTHON "$temp_file" $@
-# rm "$temp_file"
