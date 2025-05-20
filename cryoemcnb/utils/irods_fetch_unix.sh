@@ -3,7 +3,7 @@
 # Invoke: curl -sSfL "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh" | bash -s -- --host "{host}" --ticket "{ticket}" --collection "{colleciton_path}"
 
 # Define path to Python
-PYTHON = "python3"
+PYTHON="python3"
 
 # Ensure irods module is installed
 version_ge() {
