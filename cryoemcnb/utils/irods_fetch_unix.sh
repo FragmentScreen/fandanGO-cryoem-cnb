@@ -6,7 +6,7 @@
 PYTHON="python3"
 
 REQUIRED_VERSION="3.0.0"
-download=false
+DOWNLOAD=false
 
 # Ensure irods module is installed
 
@@ -15,7 +15,7 @@ if $PYTHON -c "import irods; print(irods.__version__)" >/dev/null 2>&1; then
 
     if [ "$VERSION" = "$REQUIRED_VERSION" ]; then
         echo "iRODS module found (version $VERSION)."
-        download=true
+        DOWNLOAD=true
 
     else
         read -p "iRODS version $VERSION found, but $REQUIRED_VERSION is required. Do you want to change to it? [y/n]" UPGRADE
@@ -23,7 +23,7 @@ if $PYTHON -c "import irods; print(irods.__version__)" >/dev/null 2>&1; then
         if [[ "$UPGRADE" == "y" || "$UPGRADE" == "yes" ]]; then
             echo "Changing python-irodsclient version..."
             $PYTHON -m pip install --upgrade "python-irodsclient==$REQUIRED_VERSION"
-            download=true
+            DOWNLOAD=true
         else
             echo "Not changing python-irodsclient version"
         fi
@@ -34,13 +34,13 @@ else
     if [[ "$INSTALL" == "y" || "$INSTALL" == "yes" ]]; then
         echo "Installing python-irodsclient..."
         $PYTHON -m pip install "python-irodsclient==$REQUIRED_VERSION"
-        download=true
+        DOWNLOAD=true
     else
         echo "Not installing python-irodsclient"
     fi
 fi
 
-if [ "$download" = true ]; then
+if [ "$DOWNLOAD" = true ]; then
     # Execute downloader from url
     python_script_url="https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch.py"
     curl -fL $python_script_url | $PYTHON - $@
