@@ -1,6 +1,6 @@
 # The following code was from https://github.com/cemcof/cemcof.github.io/blob/main/irods_fetch_unix.sh
 
-# Invoke: curl -sSfL "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh" | bash -s -- --host "{host}" --ticket "{ticket}" --collection "{colleciton_path}" --output_dir "{output_dir}"
+# Invoke: curl -sSfL "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh" | bash -s -- --host "{host}" --ticket "{ticket}" --collection "{collection_path}" --output_dir "{output_dir}"
 
 # Define path to Python
 PYTHON="python3"
