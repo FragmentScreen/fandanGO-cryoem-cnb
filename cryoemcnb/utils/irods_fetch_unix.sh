@@ -18,26 +18,10 @@ if $PYTHON -c "import irods; print(irods.__version__)" >/dev/null 2>&1; then
         DOWNLOAD=true
 
     else
-        read -p "iRODS version $VERSION found, but $REQUIRED_VERSION is required. Do you want to change to it? [y/n]" UPGRADE
-        UPGRADE=${UPGRADE,,}  # to lowercase
-        if [[ "$UPGRADE" == "y" || "$UPGRADE" == "yes" ]]; then
-            echo "Changing python-irodsclient version..."
-            $PYTHON -m pip install --upgrade "python-irodsclient==$REQUIRED_VERSION"
-            DOWNLOAD=true
-        else
-            echo "Not changing python-irodsclient version"
-        fi
+        echo "iRODS version $VERSION found, but $REQUIRED_VERSION is required. Change it by executing: $PYTHON -m pip install --upgrade python-irodsclient==$REQUIRED_VERSION"
     fi
 else
-    read -p "python-irodsclient is not installed or could not get the version. Do you want to install it (version $REQUIRED_VERSION)? [y/n]" INSTALL
-    INSTALL=${INSTALL,,}  # to lowercase
-    if [[ "$INSTALL" == "y" || "$INSTALL" == "yes" ]]; then
-        echo "Installing python-irodsclient..."
-        $PYTHON -m pip install "python-irodsclient==$REQUIRED_VERSION"
-        DOWNLOAD=true
-    else
-        echo "Not installing python-irodsclient"
-    fi
+    echo "python-irodsclient is not installed or could not get the version. Get it by executing: $PYTHON -m pip install python-irodsclient==$REQUIRED_VERSION"
 fi
 
 if [ "$DOWNLOAD" = true ]; then

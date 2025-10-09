@@ -20,26 +20,10 @@ if ($VERSION) {
         Write-Host "iRODS module found (version $VERSION)."
         DOWNLOAD=$true
     } else {
-        $UPGRADE = Read-Host "iRODS version $VERSION found, but $REQUIRED_VERSION is required. Do you want to change to it? [y/n]"
-        $UPGRADE = $UPGRADE.ToLower()
-        if ($UPGRADE -eq "y" -or $UPGRADE -eq "yes") {
-            Write-Host "Changing python-irodsclient version..."
-            & $PYTHON -m pip install --upgrade "python-irodsclient==$REQUIRED_VERSION"
-            $DOWNLOAD = $true
-        } else {
-            Write-Host "Not changing python-irodsclient version"
-        }
+        Write-Host "iRODS version $VERSION found, but $REQUIRED_VERSION is required. Change it by executing: $PYTHON -m pip install --upgrade python-irodsclient==$REQUIRED_VERSION"
     }
 } else {
-    $INSTALL = Read-Host "python-irodsclient is not installed or could not get the version. Do you want to install it (version $REQUIRED_VERSION)? [y/n]"
-    $INSTALL = $INSTALL.ToLower()
-    if ($INSTALL -eq "y" -or $INSTALL -eq "yes") {
-        Write-Host "Installing python-irodsclient..."
-        & $PYTHON -m pip install "python-irodsclient==$REQUIRED_VERSION"
-        $DOWNLOAD = $true
-        } else {
-            Write-Host "Not changing python-irodsclient version"
-        }
+    Write-Host "python-irodsclient is not installed or could not get the version. Get it by executing: $PYTHON -m pip install python-irodsclient==$REQUIRED_VERSION"
 }
 
 if ($DOWNLOAD) {
