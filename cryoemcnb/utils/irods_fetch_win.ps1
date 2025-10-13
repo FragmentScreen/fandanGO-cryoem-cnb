@@ -4,7 +4,7 @@
 $PYTHON = "python"
 
 $REQUIRED_VERSION = "3.0.0"
-DOWNLOAD=$false
+$DOWNLOAD=$false
 
 # Ensure irods module is installed
 
@@ -18,7 +18,7 @@ if ($VERSION) {
     $VERSION = $VERSION.Trim()
     if ($VERSION -eq $REQUIRED_VERSION) {
         Write-Host "iRODS module found (version $VERSION)."
-        DOWNLOAD=$true
+        $DOWNLOAD=$true
     } else {
         Write-Host "iRODS version $VERSION found, but $REQUIRED_VERSION is required. Change it by executing: $PYTHON -m pip install --upgrade python-irodsclient==$REQUIRED_VERSION"
     }
