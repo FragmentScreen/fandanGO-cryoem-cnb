@@ -1,7 +1,7 @@
 import os
 from irods.session import iRODSSession
 from irods.ticket import Ticket
-from irods.exception import CollectionDoesNotExist, NetworkException
+from irods.exception import CollectionDoesNotExist, NetworkException, DataObjectDoesNotExist
 from irods.access import iRODSAccess
 from dotenv import load_dotenv
 import time
@@ -53,6 +53,29 @@ def ensure_collection_exists(session, irods_subdir, max_retries=15):
     return False
 
 
+def file_exists(session, irods_file):
+    """Checks if file already exists in iRODS"""
+    try:
+        session.data_objects.get(irods_file)
+        return True
+    except DataObjectDoesNotExist:
+        return False
+    except Exception as e:
+        print(f"Error checking existence of {irods_file}: {e}")
+        return False
+
+
+def same_size(session, local_file, irods_file):
+    """Checks if a local file has the same size as an iRODS file"""
+    try:
+        obj = session.data_objects.get(irods_file)
+        irods_size = obj.size
+        local_size = os.path.getsize(local_file)
+        return irods_size == local_size
+    except DataObjectDoesNotExist:
+        return False
+
+
 def upload_file_with_reconnect(session, local_file, irods_file, max_retries=15):
     for attempt in range(max_retries):
         try:
@@ -69,7 +92,7 @@ def upload_file_with_reconnect(session, local_file, irods_file, max_retries=15):
     return False
 
 
-def copy_data(project_name, raw_data_path):
+def copy_data(project_name, raw_data_path, create_ticket=True, copy_symlink=True):
     """
     Function that creates an iRODS collection from data provided
 
@@ -90,6 +113,7 @@ def copy_data(project_name, raw_data_path):
         try:
             # create new collection and put the data onto it
             new_collection = irods_parent_collection + project_name
+            ensure_collection_exists(session, new_collection)
 
             # upload recursively
             for root, dirs, files in os.walk(raw_data_path):
@@ -107,6 +131,16 @@ def copy_data(project_name, raw_data_path):
                         print(f'Skipping broken symlink: {local_file}')
                         continue
                     irods_file = os.path.join(new_collection, os.path.relpath(local_file, raw_data_path)).replace("\\", "/")
+                    # check if file was already copied
+                    if file_exists(session, irods_file):
+                        if same_size(session, local_file, irods_file):
+                            print(f"Skipping {local_file} -> {irods_file} (already exists with same size in iRODS).")
+                            continue
+
+                    if os.path.islink(local_file) and not copy_symlink:
+                        print(f"Skipping {local_file} -> is a symlink and copy_symlink variable is set to False!")
+                        continue
+
                     print(f"Copying {local_file} into {irods_file} ...")
                     if upload_file_with_reconnect(session, local_file, irods_file):
                         print("... copied!")
@@ -117,11 +151,12 @@ def copy_data(project_name, raw_data_path):
             session.acls.set(iRODSAccess('null', new_collection, 'anonymous'), recursive=True)
             session.acls.set(iRODSAccess('null', new_collection, 'public'), recursive=True)
 
-            # create ticket for retrieving the data back
-            print(f'Creating ticket for project {project_name}...')
-            new_ticket = Ticket(session)
-            ticket_id = new_ticket.issue(target=new_collection, permission='read').string
-            print(f'... ticket generated with id {ticket_id}...')
+            if create_ticket:
+                # create ticket for retrieving the data back
+                print(f'Creating ticket for project {project_name}...')
+                new_ticket = Ticket(session)
+                ticket_id = new_ticket.issue(target=new_collection, permission='read').string
+                print(f'... ticket generated with id {ticket_id}...')
 
             # get collection physical location
             first_file_physical_path = find_collection_physical_path(session, new_collection)
@@ -133,14 +168,21 @@ def copy_data(project_name, raw_data_path):
 
     if success:
         # update ddbb
-        update_project(project_name, 'data_retrieval_command', f'curl -sSfL "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh" | bash -s -- --host "{irods_host}" --collection "{new_collection}" --ticket "{ticket_id}"')
         update_project(project_name, 'data_physical_location', collection_physical_path)
 
         info = {'irods_host': irods_host,
-                'irods_location': new_collection,
-                'irods_ticket_id': ticket_id,
-                'irods_retrieval_script': 'https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh'}
-
+                'irods_location': new_collection}
+        if create_ticket:
+            info['irods_ticket_id'] = ticket_id
+            cmd_linux = f'curl -sSfL "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/main/cryoemcnb/utils/irods_fetch_unix.sh" | bash -s -- --host "{irods_host}" --collection "{new_collection}" --ticket "{ticket_id}" --output_dir "{project_name}"'
+            cmd_windows = f'$scriptPath = "$(Get-Location)\irods_fetch_win.ps1";\n'\
+                          f'(Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/FragmentScreen/fandanGO-cryoem-cnb/refs/heads/main/cryoemcnb/utils/irods_fetch_win.ps1").Content | Out-File $scriptPath -Encoding UTF8;\n'\
+                          f'& powershell -ExecutionPolicy Bypass -File $scriptPath --host {irods_host} --collection "{new_collection}" --ticket "{ticket_id}" --output_dir "{project_name}";\n' \
+                          f'Remove-Item $scriptPath'
+            info['irods_retrieval_script_linux'] = cmd_linux
+            info['irods_retrieval_script_windows'] = cmd_windows
+            update_project(project_name, 'data_retrieval_command_linux', cmd_linux)
+            update_project(project_name, 'data_retrieval_command_windows', cmd_windows)
     return success, info
 
 
