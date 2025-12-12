@@ -26,7 +26,8 @@ def send_metadata(project_name, visit_id):
 
     try:
         project_metadata = get_project_metadata(project_name)
-        project_retrieval_info = get_project_data_retrieval_info(project_name)
+        project_retrieval_info_linux = get_project_data_retrieval_info(project_name, operating_system='linux')
+        project_retrieval_info_windows = get_project_data_retrieval_info(project_name, operating_system='windows')
 
         aria = AriaClient(True)
         aria.login()
@@ -47,10 +48,16 @@ def send_metadata(project_name, visit_id):
                     success = False
 
         # data retrieval info
-        record_retrieval_info = visit.create_record(bucket.id, 'Generic')
-        field = Field(record_retrieval_info.id, 'COMMAND', project_retrieval_info)
-        visit.push(field)
-        if not isinstance(field, Field):
+        record_retrieval_info_linux = visit.create_record(bucket.id, 'Generic')
+        field_linux = Field(record_retrieval_info_linux.id, 'COMMAND', project_retrieval_info_linux)
+        visit.push(field_linux)
+        if not isinstance(field_linux, Field):
+            success = False
+
+        record_retrieval_info_windows = visit.create_record(bucket.id, 'Generic')
+        field_windows = Field(record_retrieval_info_linux.id, 'COMMAND', project_retrieval_info_windows)
+        visit.push(field_windows)
+        if not isinstance(field_windows, Field):
             success = False
 
     except Exception as e:
@@ -61,8 +68,10 @@ def send_metadata(project_name, visit_id):
         print(f'Successfully sent metadata for project {project_name} to ARIA!')
         info = {'bucket': bucket.__dict__,
                 'record_oscem': record_oscem.__dict__,
-                'record_retrieval_info': record_retrieval_info.__dict__,
-                'field': field.__dict__}
+                'record_retrieval_info_linux': record_retrieval_info_linux.__dict__,
+                'record_retrieval_info_linux': record_retrieval_info_windows.__dict__,
+                'field_linux': field_linux.__dict__,
+                'field_windows': field_windows.__dict__}
 
     return success, info
 

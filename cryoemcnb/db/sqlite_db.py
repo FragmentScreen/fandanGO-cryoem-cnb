@@ -36,7 +36,7 @@ def get_project_metadata(project_name):
     try:
         connection = connect_to_ddbb()
         cursor = connection.cursor()
-        cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "metadata_path"', (project_name,))
+        cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "metadata_path" ORDER BY ROWID DESC', (project_name,))
         project_metadata = cursor.fetchall()
         project_metadata = [metadata_file[0] for metadata_file in project_metadata]
         return project_metadata
@@ -47,12 +47,15 @@ def get_project_metadata(project_name):
             close_connection_to_ddbb(connection)
 
 
-def get_project_data_retrieval_info(project_name):
+def get_project_data_retrieval_info(project_name, operating_system):
     connection = None
     try:
         connection = connect_to_ddbb()
         cursor = connection.cursor()
-        cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "data_retrieval_command"', (project_name,))
+        if operating_system == 'linux':
+            cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "data_retrieval_command_linux" ORDER BY ROWID DESC', (project_name,))
+        elif operating_system == 'windows':
+            cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "data_retrieval_command_windows" ORDER BY ROWID DESC', (project_name,))
         retrieval_info = cursor.fetchall()
         retrieval_info = [command[0] for command in retrieval_info]
         return retrieval_info
