@@ -1,8 +1,7 @@
 from cryoemcnb.db.sqlite_db import get_project_metadata, get_project_data_retrieval_info
 from datetime import datetime
 from dotenv import load_dotenv
-import json
-import os
+import yaml
 from fGOaria import AriaClient, Bucket, Field, pretty_print
 
 load_dotenv()
@@ -39,10 +38,10 @@ def send_metadata(project_name, visit_id):
 
         # project metadata
         record_oscem = visit.create_record(bucket.id, 'OSCEM')
-        for json_path in project_metadata:
-            with open(json_path, 'r') as file:
-                data = json.load(file)
-                field = Field(record_oscem.id, 'JSON', data)
+        for yaml_path in project_metadata:
+            with open(yaml_path, 'r') as file:
+                data = yaml.safe_load(file)
+                field = Field(record_oscem.id, 'YAML', data)
                 visit.push(field)
                 if not isinstance(field, Field):
                     success = False
