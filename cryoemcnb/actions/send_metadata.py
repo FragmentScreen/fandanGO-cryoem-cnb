@@ -3,7 +3,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 import yaml
 from fGOaria import AriaClient, Bucket, Field, pretty_print
-
+from ..constants import EMBARGO_YEARS
+import os
 load_dotenv()
 
 def send_metadata(project_name, visit_id):
@@ -32,30 +33,30 @@ def send_metadata(project_name, visit_id):
         aria.login()
         today = datetime.today()
         visit = aria.new_data_manager(int(visit_id), 'visit', True)
-        embargo_date = datetime(today.year + 3, today.month, today.day).strftime('%Y-%m-%d')
+        embargo_date = datetime(today.year + EMBARGO_YEARS, today.month, today.day).strftime('%Y-%m-%d')
         bucket = Bucket(visit.entity_id, visit.entity_type, embargo_date)
-        visit.push(bucket)
+        visit.push_safe_cli(bucket)
 
         # project metadata
         record_oscem = visit.create_record(bucket.id, 'OSCEM')
         for yaml_path in project_metadata:
-            with open(yaml_path, 'r') as file:
-                data = yaml.safe_load(file)
-                field = Field(record_oscem.id, 'YAML', data)
-                visit.push(field)
-                if not isinstance(field, Field):
-                    success = False
-
+            if os.path.isfile(yaml_path):
+                with open(yaml_path, 'r') as file:
+                    data = yaml.safe_load(file)
+                    field = Field(record_oscem.id, 'YAML', data)
+                    visit.push_safe_cli(field)
+                    if not isinstance(field, Field):
+                        success = False
         # data retrieval info
         record_retrieval_info_linux = visit.create_record(bucket.id, 'Generic')
         field_linux = Field(record_retrieval_info_linux.id, 'COMMAND', project_retrieval_info_linux)
-        visit.push(field_linux)
+        visit.push_safe_cli(field_linux)
         if not isinstance(field_linux, Field):
             success = False
 
         record_retrieval_info_windows = visit.create_record(bucket.id, 'Generic')
         field_windows = Field(record_retrieval_info_linux.id, 'COMMAND', project_retrieval_info_windows)
-        visit.push(field_windows)
+        visit.push_safe_cli(field_windows)
         if not isinstance(field_windows, Field):
             success = False
 
@@ -68,7 +69,7 @@ def send_metadata(project_name, visit_id):
         info = {'bucket': bucket.__dict__,
                 'record_oscem': record_oscem.__dict__,
                 'record_retrieval_info_linux': record_retrieval_info_linux.__dict__,
-                'record_retrieval_info_linux': record_retrieval_info_windows.__dict__,
+                'record_retrieval_info_windows': record_retrieval_info_windows.__dict__,
                 'field_linux': field_linux.__dict__,
                 'field_windows': field_windows.__dict__}
 

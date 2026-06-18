@@ -12,3 +12,4 @@ ACTION_PRINT_PROJECT = 'print-project'
 #
 
 DBNAME = 'fandango-cryoem-cnb.sqlite'
+EMBARGO_YEARS = 3
