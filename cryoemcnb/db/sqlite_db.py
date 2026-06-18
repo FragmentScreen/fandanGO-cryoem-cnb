@@ -6,11 +6,46 @@ def update_project(project_name, key, value):
     try:
         connection = connect_to_ddbb()
         cursor = connection.cursor()
-        cursor.execute('INSERT INTO project_info VALUES (?, ?, ?)', (project_name, key, value))
+
+        # 1. comprobar si ya existe el atributo
+        cursor.execute(
+            '''
+            SELECT 1 FROM project_info
+            WHERE project_name = ? AND key = ?
+            ''',
+            (project_name, key)
+        )
+        exists = cursor.fetchone()
+
+        if exists:
+            print(
+                f'... attribute "{key}" already exists for project {project_name}, updating value')
+
+            cursor.execute(
+                '''
+                UPDATE project_info
+                SET value = ?
+                WHERE project_name = ? AND key = ?
+                ''',
+                (value, project_name, key)
+            )
+        else:
+            print(f'... attribute "{key}" does not exist, inserting new entry')
+
+            cursor.execute(
+                '''
+                INSERT INTO project_info (project_name, key, value)
+                VALUES (?, ?, ?)
+                ''',
+                (project_name, key, value)
+            )
+
         connection.commit()
         print(f'... project {project_name} updated: "{key}" = "{value}"')
+
     except Exception as e:
         print(f'... project could not be updated because of: {e}')
+
     finally:
         if connection:
             close_connection_to_ddbb(connection)
