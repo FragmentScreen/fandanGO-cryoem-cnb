@@ -13,6 +13,8 @@ def provide_raw_data(project_name, raw_data_links):
         print('exist a raw_data_ticket_windows on the project, associating the new...') if exists else print('raw_data_ticket_windows does not exist on the project, associating...')
         update_project(project_name, 'raw_data_ticket_windows', raw_data_links)
         info = {'raw_data_ticket_windows': raw_data_links}
+        update_project(project_name, 'raw_data_ticket_windows', raw_data_links)
+
     else:
         info = (f'... raw_data_ticket_windows could not be retrieved)')
     return success, info

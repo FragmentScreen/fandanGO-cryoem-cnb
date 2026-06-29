@@ -1,51 +1,17 @@
 from cryoemcnb.db.sqlite import connect_to_ddbb, close_connection_to_ddbb
 
 
+
 def update_project(project_name, key, value):
     connection = None
     try:
         connection = connect_to_ddbb()
         cursor = connection.cursor()
-
-        # 1. comprobar si ya existe el atributo
-        cursor.execute(
-            '''
-            SELECT 1 FROM project_info
-            WHERE project_name = ? AND key = ?
-            ''',
-            (project_name, key)
-        )
-        exists = cursor.fetchone()
-
-        if exists:
-            print(
-                f'... attribute "{key}" already exists for project {project_name}, updating value')
-
-            cursor.execute(
-                '''
-                UPDATE project_info
-                SET value = ?
-                WHERE project_name = ? AND key = ?
-                ''',
-                (value, project_name, key)
-            )
-        else:
-            print(f'... attribute "{key}" does not exist, inserting new entry')
-
-            cursor.execute(
-                '''
-                INSERT INTO project_info (project_name, key, value)
-                VALUES (?, ?, ?)
-                ''',
-                (project_name, key, value)
-            )
-
+        cursor.execute('INSERT INTO project_info VALUES (?, ?, ?)', (project_name, key, value))
         connection.commit()
         print(f'... project {project_name} updated: "{key}" = "{value}"')
-
     except Exception as e:
         print(f'... project could not be updated because of: {e}')
-
     finally:
         if connection:
             close_connection_to_ddbb(connection)
@@ -88,9 +54,9 @@ def get_project_data_retrieval_info(project_name, operating_system):
         connection = connect_to_ddbb()
         cursor = connection.cursor()
         if operating_system == 'linux':
-            cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "data_retrieval_command_linux" ORDER BY ROWID DESC', (project_name,))
+            cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "raw_data_ticket_linux" ORDER BY ROWID DESC', (project_name,))
         elif operating_system == 'windows':
-            cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "data_retrieval_command_windows" ORDER BY ROWID DESC', (project_name,))
+            cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "raw_data_ticket_windows" ORDER BY ROWID DESC', (project_name,))
         retrieval_info = cursor.fetchall()
         retrieval_info = [command[0] for command in retrieval_info]
         return retrieval_info
