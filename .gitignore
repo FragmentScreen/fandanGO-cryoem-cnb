@@ -1,6 +1,27 @@
+# Local config files
 .env
-config.yaml
-build
-*.egg-info
-*.sqlite
-__pycache__
+plugin.cfg
+
+# Python build files
+venv/
+build/
+dist/
+*.egg
+*.egg-info/
+*.pyc
+__pycache__/
+*.pyo
+
+# Testing cache files
+*.pytest_cache
+
+# Log files
+*.log
+
+# Outputs
+out/
+
+# IDE files
+.idea/
+.DS_Store
+.vscode/
