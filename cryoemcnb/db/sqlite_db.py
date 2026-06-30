@@ -31,7 +31,7 @@ def get_project_metadata(project_name: str) -> List[Tuple[str, str]]:
         all=True
     )
 
-def get_project_value(project_name: str, key: str, default: Optional[str]) -> str:
+def get_project_value(project_name: str, key: str, default: Optional[str] = None) -> Optional[str]:
     return _db_conn().get(project_name, key) or default
 
 def get_project_data_retrieval_info(project_name: str, operating_system: str):
