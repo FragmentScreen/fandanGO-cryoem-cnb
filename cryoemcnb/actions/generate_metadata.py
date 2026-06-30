@@ -6,10 +6,10 @@ from sqlite3 import dbapi2 as sqlite
 import json
 
 config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'config.yaml'))
-scipion_launcher = config['SCIPION'].get('SCIPION_LAUNCHER')
-scipion_projects_path = config['SCIPION'].get('SCIPION_PROJECTS_PATH')
-emadmin_ddbb_path = config['EMADMIN'].get('EMADMIN_DDBB_PATH')
+config.read(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'plugin.cfg'))
+scipion_launcher = config.get(section='SCIPION', option='SCIPION_LAUNCHER')
+scipion_projects_path = config.get(section='SCIPION', option='SCIPION_PROJECTS_PATH')
+emadmin_ddbb_path = config.get(section='EMADMIN',  option='EMADMIN_DDBB_PATH')
 
 def generate_metadata_data(project_name, metadata_path):
     """
