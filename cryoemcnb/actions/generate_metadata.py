@@ -11,6 +11,7 @@ scipion_launcher = config.get(section='SCIPION', option='SCIPION_LAUNCHER')
 scipion_projects_path = config.get(section='SCIPION', option='SCIPION_PROJECTS_PATH')
 emadmin_ddbb_path = config.get(section='EMADMIN',  option='EMADMIN_DDBB_PATH')
 
+
 def generate_metadata_data(project_name, metadata_path):
     """
     Function that generates metadata for a FandanGO project
