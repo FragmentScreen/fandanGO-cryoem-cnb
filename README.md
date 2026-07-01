@@ -2,7 +2,7 @@
 
 [![OSV Scanner](https://github.com/FragmentScreen/fandanGO-cryoem-cnb/actions/workflows/osv-scanner.yml/badge.svg)](https://github.com/FragmentScreen/fandanGO-cryoem-cnb/actions/workflows/osv-scanner.yml)
 
-FandanGO plugin for the Cry-EM facility at CNB-CSIC (Madrid, Spain).
+FandanGO plugin for the Cryo-EM facility at CNB-CSIC (Madrid, Spain).
 
 ## Security Scanning
 
