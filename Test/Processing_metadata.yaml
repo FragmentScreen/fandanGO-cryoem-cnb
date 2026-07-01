@@ -1,0 +1,64 @@
+processing:
+    movies:
+        dose_per_image:
+            value: 1.0
+            unit: e/Å²
+        descriptors:
+        -   descriptor_name: LegacyProtocol
+            descriptor_thing:
+                binning_factor: 1.0
+                frames_aligned:
+                    frame0: 1
+                    frameN: 8
+                output_avg_shift:
+                    value: 5.2
+                    unit: Å
+                output_max_shift:
+                    value: 39.4
+                    unit: Å
+        -   descriptor_name: XmippProtMovieMaxShift
+            descriptor_thing:
+                discarded_movies: 9
+                max_frame_shift:
+                    value: 10.0
+                    unit: Å
+                max_movie_shift:
+                    value: 30.0
+                    unit: Å
+                rejection_type: by frame or movie
+                output_avg_shift:
+                    value: 1.5
+                    unit: Å
+                output_max_shift:
+                    value: 29.5
+                    unit: Å
+                shift_histogram: shift_hist.jpg
+    micrographs:
+        number_micrographs: 111
+    CTFs:
+        amplitude_contrast: 0.1
+        defocus:
+            output_min_defocus:
+                value: 4253.4
+                unit: Å
+            output_max_defocus:
+                value: 38830.1
+                unit: Å
+            output_avg_defocus:
+                value: 21523.8
+                unit: Å
+            defocus_histogram: defocus_hist.jpg
+            defocus_micrograph_examples: Micro_examples/micro_defocus.jpg
+        resolution:
+            output_min_resolution:
+                value: 5.9
+                unit: Å
+            output_max_resolution:
+                value: 4.0
+                unit: Å
+            output_avg_resolution:
+                value: 5.3
+                unit: Å
+            resolution_histogram: resolution_hist.jpg
+        astigmatism:
+            astigmatism_histogram: astigmatism_hist.jpg
