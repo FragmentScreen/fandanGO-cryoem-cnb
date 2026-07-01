@@ -1,67 +1,44 @@
-from cryoemcnb.db.sqlite import connect_to_ddbb, close_connection_to_ddbb
+import os
+from typing import Tuple, List, Optional
+from cryoemcnb.constants import DBNAME
+from fGOdb import SQLiteDB, ProjectInfo
 
+def _db_conn() -> ProjectInfo:
+    """Return a connection to the plugin's local project SQLite database."""
+    config_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    config_file = os.path.join(config_path, "plugin.cfg")
+    return ProjectInfo(SQLiteDB(config_file, DBNAME))
 
+def update_project(project_name: str, key: str, value: str) -> None:
+    """Update a metadata field for a given project."""
+    _db_conn().set(project_name, key, value)
 
-def update_project(project_name, key, value):
-    connection = None
-    try:
-        connection = connect_to_ddbb()
-        cursor = connection.cursor()
-        cursor.execute('INSERT INTO project_info VALUES (?, ?, ?)', (project_name, key, value))
-        connection.commit()
-        print(f'... project {project_name} updated: "{key}" = "{value}"')
-    except Exception as e:
-        print(f'... project could not be updated because of: {e}')
-    finally:
-        if connection:
-            close_connection_to_ddbb(connection)
+def get_project_info(project_name: str) -> Tuple[List[str], List[Tuple]]:
+    """Return list of metadata fields for a given project.
+    Returns:
+        Tuple[List[str], List[Tuple]]: Column names and list of metadata fields.
+    """
+    return ["key", "value"], _db_conn().list_by_project(project_name)
 
+def get_project_metadata(project_name: str) -> List[Tuple[str, str]]:
+    """Return list of metadata files for a given project.
+    Returns:
+        List[Tuple[str, str]]: Column names and list of metadata files.
+    """
+    return _db_conn().get(
+        project_name,
+        "metadata_path",
+        all=True
+    )
 
-def get_project_info(project_name):
-    connection = None
-    try:
-        connection = connect_to_ddbb()
-        cursor = connection.cursor()
-        cursor.execute('SELECT * FROM project_info WHERE project_name = ?', (project_name,))
-        project_info = cursor.fetchall()
-        column_names = [columns[0] for columns in cursor.description]
-        return column_names, project_info
-    except Exception as e:
-        print(f'... could not check projects because of: {e}')
-    finally:
-        if connection:
-            close_connection_to_ddbb(connection)
+def get_project_value(project_name: str, key: str, default: Optional[str] = None) -> Optional[str]:
+    return _db_conn().get(project_name, key) or default
 
-def get_project_metadata(project_name):
-    connection = None
-    try:
-        connection = connect_to_ddbb()
-        cursor = connection.cursor()
-        cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "metadata_path" ORDER BY ROWID DESC', (project_name,))
-        project_metadata = cursor.fetchall()
-        project_metadata = [metadata_file[0] for metadata_file in project_metadata]
-        return project_metadata
-    except Exception as e:
-        print(f'... could not check projects because of: {e}')
-    finally:
-        if connection:
-            close_connection_to_ddbb(connection)
-
-
-def get_project_data_retrieval_info(project_name, operating_system):
-    connection = None
-    try:
-        connection = connect_to_ddbb()
-        cursor = connection.cursor()
-        if operating_system == 'linux':
-            cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "raw_data_ticket_linux" ORDER BY ROWID DESC', (project_name,))
-        elif operating_system == 'windows':
-            cursor.execute('SELECT value FROM project_info WHERE project_name = ? AND key = "raw_data_ticket_windows" ORDER BY ROWID DESC', (project_name,))
-        retrieval_info = cursor.fetchall()
-        retrieval_info = [command[0] for command in retrieval_info]
-        return retrieval_info
-    except Exception as e:
-        print(f'... could not check projects because of: {e}')
-    finally:
-        if connection:
-            close_connection_to_ddbb(connection)
+def get_project_data_retrieval_info(project_name: str, operating_system: str):
+    if operating_system.lower() == 'linux':
+        key = "raw_data_ticket_linux"
+    elif operating_system.lower() == 'windows':
+        key = "raw_data_ticket_windows"
+    else:
+        raise ValueError(f"Invalid operating system: {operating_system}. Please use 'linux' or 'windows'.")
+    return _db_conn().get(project_name, key)
