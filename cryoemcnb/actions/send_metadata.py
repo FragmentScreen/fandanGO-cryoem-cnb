@@ -49,20 +49,21 @@ def send_metadata(project_name, visit_id):
                         success = False
         # data retrieval info
         record_retrieval_info_linux = visit.create_record(bucket.id, 'Generic')
-        field_linux = Field(record_retrieval_info_linux.id, 'COMMAND', project_retrieval_info_linux)
-        visit.push_safe_cli(field_linux)
-        if not isinstance(field_linux, Field):
+        raw_data_download_commands_linux = Field(record_retrieval_info_linux.id, 'COMMAND', project_retrieval_info_linux)
+        visit.push_safe_cli(raw_data_download_commands_linux)
+        if not isinstance(raw_data_download_commands_linux, Field):
             success = False
 
         record_retrieval_info_windows = visit.create_record(bucket.id, 'Generic')
-        field_windows = Field(record_retrieval_info_linux.id, 'COMMAND', project_retrieval_info_windows)
-        visit.push_safe_cli(field_windows)
-        if not isinstance(field_windows, Field):
+        raw_data_download_commands_windows = Field(record_retrieval_info_windows.id, 'COMMAND', project_retrieval_info_windows)
+        visit.push_safe_cli(raw_data_download_commands_windows)
+        if not isinstance(raw_data_download_commands_windows, Field):
             success = False
 
     except Exception as e:
         success = False
         info = e
+        print(f'Error send_metadata: {e}')
 
     if success:
         print(f'Successfully sent metadata for project {project_name} to ARIA!')
@@ -70,8 +71,13 @@ def send_metadata(project_name, visit_id):
                 'record_oscem': record_oscem.__dict__,
                 'record_retrieval_info_linux': record_retrieval_info_linux.__dict__,
                 'record_retrieval_info_windows': record_retrieval_info_windows.__dict__,
-                'field_linux': field_linux.__dict__,
-                'field_windows': field_windows.__dict__}
+                'raw_data_download_commands_linux': raw_data_download_commands_linux.__dict__,
+                'raw_data_download_commands_windows': raw_data_download_commands_windows.__dict__}
+        print(f'FandanGO record_id Linux: {record_retrieval_info_linux._id}')
+        print(f'FandanGO record_id Windows: {record_retrieval_info_windows._id}')
+        print(f'FandanGO record_id oscem: {record_oscem._id}')
+
+
 
     return success, info
 
