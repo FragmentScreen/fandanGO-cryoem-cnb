@@ -65,8 +65,6 @@ def send_metadata(project_name, visit_id):
         info = e
         print(f'Error send_metadata: {e}')
 
-
-
     if success:
         print(f'Successfully sent metadata for project {project_name} to ARIA!')
         info = {'bucket': bucket.__dict__,
