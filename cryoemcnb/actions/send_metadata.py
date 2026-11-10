@@ -58,7 +58,7 @@ def send_metadata(project_name, visit_id):
         raw_data_download_commands_windows = Field(record_retrieval_info_windows.id, 'COMMAND', project_retrieval_info_windows)
         visit.push_safe_cli(raw_data_download_commands_windows)
         if not isinstance(raw_data_download_commands_windows, Field):
-            success = False
+            success = False 
 
     except Exception as e:
         success = False
